@@ -20,6 +20,9 @@ import br.com.edras.picpaysimplificado.exception.user.UserNotFoundException;
 import br.com.edras.picpaysimplificado.repository.TransactionRepository;
 import br.com.edras.picpaysimplificado.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -76,6 +79,10 @@ public class TransactionService {
     // -----------------------------------------------------------------------------------------------------------------
 
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "transactions:user", key = "#dto.payerId"),
+            @CacheEvict(value = "transactions:user", key = "#dto.payeeId")
+    })
     public TransactionResponseDTO transfer(TransactionRequestDTO dto) {
 
         if (dto.getPayerId().equals(dto.getPayeeId())) {
@@ -133,6 +140,10 @@ public class TransactionService {
 
     // Sobrecarga para quando as APIs estiverem fora do ar.
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "transactions:user", key = "#dto.payerId"),
+            @CacheEvict(value = "transactions:user", key = "#dto.payeeId")
+    })
     public TransactionResponseDTO transfer(TransactionRequestDTO dto, TransactionStatus authStatus) {
 
         if (dto.getPayerId().equals(dto.getPayeeId())) {
@@ -179,12 +190,14 @@ public class TransactionService {
         return new TransactionResponseDTO(completedTransaction);
     }
 
+    @Cacheable(value = "transactions", key = "#id")
     public TransactionResponseDTO findById(Long id) {
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new TransactionNotFoundException(id));
         return new TransactionResponseDTO(transaction);
     }
 
+    @Cacheable(value = "transactions:user", key = "#userId")
     public List<TransactionResponseDTO> findTransactionsByUserId(Long userId) {
         List<Transaction> transactions = transactionRepository.findByUserId(userId);
         return transactions.stream().map(TransactionResponseDTO::new).toList();
