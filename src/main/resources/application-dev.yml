@@ -12,6 +12,11 @@ spring:
   jpa:
     show-sql: true
 
+  data:
+    redis:
+      host: redis
+      port: 6379
+
 # Spring Boot Actuator Setup
 management:
   endpoints:
