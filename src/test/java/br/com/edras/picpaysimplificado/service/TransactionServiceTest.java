@@ -15,11 +15,13 @@ import br.com.edras.picpaysimplificado.fixtures.MerchantUserFixtures;
 import br.com.edras.picpaysimplificado.fixtures.TransactionFixtures;
 import br.com.edras.picpaysimplificado.repository.TransactionRepository;
 import br.com.edras.picpaysimplificado.repository.UserRepository;
+import br.com.edras.picpaysimplificado.event.TransactionCompletedEvent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Collections;
 import java.util.List;
@@ -42,6 +44,12 @@ public class TransactionServiceTest {
     @Mock
     private WalletService walletService;
 
+    @Mock
+    private AuthorizationService authorizationService;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     @InjectMocks
     private TransactionService transactionService;
 
@@ -60,12 +68,15 @@ public class TransactionServiceTest {
         when(transactionRepository.save(any(Transaction.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        TransactionResponseDTO response = transactionService.transfer(requestDTO, TransactionStatus.AUTHORIZED);
+        when(authorizationService.authorize()).thenReturn(TransactionStatus.AUTHORIZED);
+
+        TransactionResponseDTO response = transactionService.transfer(requestDTO);
 
         assertThat(response).isNotNull();
 
         verify(walletService).withdraw(payer.getId(), requestDTO.getAmount());
         verify(walletService).deposit(payee.getId(), requestDTO.getAmount());
+        verify(eventPublisher).publishEvent(any(TransactionCompletedEvent.class));
     }
 
     @Test
@@ -74,9 +85,7 @@ public class TransactionServiceTest {
 
         TransactionRequestDTO requestDTO = new TransactionRequestDTO(50.00, userId, userId);
 
-        assertThrows(SameUserTransactionException.class, () -> {
-            transactionService.transfer(requestDTO, TransactionStatus.AUTHORIZED);
-        });
+        assertThrows(SameUserTransactionException.class, () -> transactionService.transfer(requestDTO));
 
         verify(transactionRepository, never()).save(any());
         verify(walletService, never()).withdraw(any(), any());
@@ -94,9 +103,7 @@ public class TransactionServiceTest {
 
         when(userRepository.findById(payer.getId())).thenReturn(Optional.of(payer));
 
-        assertThrows(MerchantCannotTransferException.class, () -> {
-            transactionService.transfer(requestDTO, TransactionStatus.AUTHORIZED);
-        });
+        assertThrows(MerchantCannotTransferException.class, () -> transactionService.transfer(requestDTO));
 
         verify(transactionRepository, never()).save(any());
         verify(walletService, never()).withdraw(any(), any());
@@ -118,9 +125,9 @@ public class TransactionServiceTest {
         when(transactionRepository.save(any(Transaction.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        assertThrows(TransactionNotAuthorizedException.class, () -> {
-            transactionService.transfer(requestDTO, TransactionStatus.FAILED);
-        });
+        when(authorizationService.authorize()).thenReturn(TransactionStatus.FAILED);
+
+        assertThrows(TransactionNotAuthorizedException.class, () -> {transactionService.transfer(requestDTO);});
 
         verify(walletService, never()).withdraw(any(), any());
         verify(walletService, never()).deposit(any(), any());
