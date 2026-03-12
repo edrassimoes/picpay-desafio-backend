@@ -13,9 +13,13 @@ import br.com.edras.picpaysimplificado.exception.transaction.TransactionNotFound
 import br.com.edras.picpaysimplificado.fixtures.CommonUserFixtures;
 import br.com.edras.picpaysimplificado.fixtures.MerchantUserFixtures;
 import br.com.edras.picpaysimplificado.fixtures.TransactionFixtures;
+import br.com.edras.picpaysimplificado.idempotency.IdempotencyKey;
+import br.com.edras.picpaysimplificado.idempotency.IdempotencyService;
 import br.com.edras.picpaysimplificado.repository.TransactionRepository;
 import br.com.edras.picpaysimplificado.repository.UserRepository;
 import br.com.edras.picpaysimplificado.event.TransactionCompletedEvent;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -50,11 +54,17 @@ public class TransactionServiceTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
+    @Mock
+    private IdempotencyService idempotencyService;
+
+    @Mock
+    private ObjectMapper objectMapper;
+
     @InjectMocks
     private TransactionService transactionService;
 
     @Test
-    void transfer_WhenSuccessful_ShouldCompleteTransaction() {
+    void transfer_WhenSuccessful_ShouldCompleteTransaction() throws JsonProcessingException {
         CommonUser payer = CommonUserFixtures.createValidCommonUser();
         CommonUser payee = CommonUserFixtures.createValidCommonUser();
         payer.setId(1L);
@@ -62,15 +72,22 @@ public class TransactionServiceTest {
 
         TransactionRequestDTO requestDTO = new TransactionRequestDTO(50.00, payer.getId(), payee.getId());
 
+        IdempotencyKey key = new IdempotencyKey(
+                "test-key",
+                null,
+                null,
+                null
+        );
+
+        when(idempotencyService.createKey(any())).thenReturn(key);
         when(userRepository.findById(payer.getId())).thenReturn(Optional.of(payer));
         when(userRepository.findById(payee.getId())).thenReturn(Optional.of(payee));
-
         when(transactionRepository.save(any(Transaction.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
-
         when(authorizationService.authorize()).thenReturn(TransactionStatus.AUTHORIZED);
+        doReturn("{}").when(objectMapper).writeValueAsString(any());
 
-        TransactionResponseDTO response = transactionService.transfer(requestDTO);
+        TransactionResponseDTO response = transactionService.transfer("test-key", requestDTO);
 
         assertThat(response).isNotNull();
 
@@ -85,11 +102,21 @@ public class TransactionServiceTest {
 
         TransactionRequestDTO requestDTO = new TransactionRequestDTO(50.00, userId, userId);
 
-        assertThrows(SameUserTransactionException.class, () -> transactionService.transfer(requestDTO));
+        IdempotencyKey key = new IdempotencyKey(
+                "test-key",
+                null,
+                null,
+                null
+        );
+
+        when(idempotencyService.createKey(any())).thenReturn(key);
+
+        assertThrows(SameUserTransactionException.class, () -> transactionService.transfer("test-key", requestDTO));
 
         verify(transactionRepository, never()).save(any());
         verify(walletService, never()).withdraw(any(), any());
         verify(walletService, never()).deposit(any(), any());
+        verify(eventPublisher, never()).publishEvent(any());
     }
 
     @Test
@@ -101,13 +128,22 @@ public class TransactionServiceTest {
 
         TransactionRequestDTO requestDTO = new TransactionRequestDTO(50.00, payer.getId(), payee.getId());
 
+        IdempotencyKey key = new IdempotencyKey(
+                "test-key",
+                null,
+                null,
+                null
+        );
+
+        when(idempotencyService.createKey(any())).thenReturn(key);
         when(userRepository.findById(payer.getId())).thenReturn(Optional.of(payer));
 
-        assertThrows(MerchantCannotTransferException.class, () -> transactionService.transfer(requestDTO));
+        assertThrows(MerchantCannotTransferException.class, () -> transactionService.transfer("test-key", requestDTO));
 
         verify(transactionRepository, never()).save(any());
         verify(walletService, never()).withdraw(any(), any());
         verify(walletService, never()).deposit(any(), any());
+        verify(eventPublisher, never()).publishEvent(any());
     }
 
     @Test
@@ -119,18 +155,25 @@ public class TransactionServiceTest {
 
         TransactionRequestDTO requestDTO = new TransactionRequestDTO(50.00, payer.getId(), payee.getId());
 
+        IdempotencyKey key = new IdempotencyKey(
+                "test-key",
+                null,
+                null,
+                null
+        );
+
+        when(idempotencyService.createKey(any())).thenReturn(key);
         when(userRepository.findById(payer.getId())).thenReturn(Optional.of(payer));
         when(userRepository.findById(payee.getId())).thenReturn(Optional.of(payee));
-
         when(transactionRepository.save(any(Transaction.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
-
         when(authorizationService.authorize()).thenReturn(TransactionStatus.FAILED);
 
-        assertThrows(TransactionNotAuthorizedException.class, () -> {transactionService.transfer(requestDTO);});
+        assertThrows(TransactionNotAuthorizedException.class, () -> {transactionService.transfer("test-key", requestDTO);});
 
         verify(walletService, never()).withdraw(any(), any());
         verify(walletService, never()).deposit(any(), any());
+        verify(eventPublisher, never()).publishEvent(any());
     }
 
     @Test

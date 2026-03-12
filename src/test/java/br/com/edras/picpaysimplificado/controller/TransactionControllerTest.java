@@ -56,9 +56,10 @@ class TransactionControllerTest {
         TransactionResponseDTO response = new TransactionResponseDTO(
                 1L, 1L, "Payer", 2L, "Payee", 100.0, LocalDateTime.now(), TransactionStatus.COMPLETED);
 
-        when(transactionService.transfer(any(TransactionRequestDTO.class))).thenReturn(response);
+        when(transactionService.transfer(any(String.class), any(TransactionRequestDTO.class))).thenReturn(response);
 
         mockMvc.perform(post("/transactions")
+                        .header("Idempotency-Key", "test-key")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -78,6 +79,7 @@ class TransactionControllerTest {
     """;
 
         mockMvc.perform(post("/transactions")
+                        .header("Idempotency-Key", "test-key")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidRequest))
                 .andExpect(status().isBadRequest());
@@ -93,10 +95,11 @@ class TransactionControllerTest {
         }
     """;
 
-        when(transactionService.transfer(any(TransactionRequestDTO.class)))
+        when(transactionService.transfer(any(String.class), any(TransactionRequestDTO.class)))
                 .thenThrow(new MerchantCannotTransferException(1L));
 
         mockMvc.perform(post("/transactions")
+                        .header("Idempotency-Key", "test-key")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isForbidden());
@@ -112,10 +115,11 @@ class TransactionControllerTest {
         }
     """;
 
-        when(transactionService.transfer(any(TransactionRequestDTO.class)))
+        when(transactionService.transfer(any(String.class), any(TransactionRequestDTO.class)))
                 .thenThrow(new SameUserTransactionException());
 
         mockMvc.perform(post("/transactions")
+                        .header("Idempotency-Key", "test-key")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidRequest))
                 .andExpect(status().isBadRequest());
@@ -131,10 +135,11 @@ class TransactionControllerTest {
         }
     """;
 
-        when(transactionService.transfer(any(TransactionRequestDTO.class)))
+        when(transactionService.transfer(any(String.class), any(TransactionRequestDTO.class)))
                 .thenThrow(new UserNotFoundException(99L));
 
         mockMvc.perform(post("/transactions")
+                        .header("Idempotency-Key", "test-key")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidRequest))
                 .andExpect(status().isNotFound());
@@ -150,10 +155,11 @@ class TransactionControllerTest {
         }
     """;
 
-        when(transactionService.transfer(any(TransactionRequestDTO.class)))
+        when(transactionService.transfer(any(String.class), any(TransactionRequestDTO.class)))
                 .thenThrow(new TransactionNotAuthorizedException());
 
         mockMvc.perform(post("/transactions")
+                        .header("Idempotency-Key", "test-key")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isForbidden());
@@ -170,6 +176,7 @@ class TransactionControllerTest {
     """;
 
         mockMvc.perform(post("/transactions")
+                        .header("Idempotency-Key", "test-key")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidRequest))
                 .andExpect(status().isBadRequest());
