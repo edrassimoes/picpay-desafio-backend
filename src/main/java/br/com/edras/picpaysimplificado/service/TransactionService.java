@@ -9,10 +9,7 @@ import br.com.edras.picpaysimplificado.entity.enums.UserType;
 import br.com.edras.picpaysimplificado.dto.transaction.TransactionRequestDTO;
 import br.com.edras.picpaysimplificado.dto.transaction.TransactionResponseDTO;
 import br.com.edras.picpaysimplificado.event.TransactionCompletedEvent;
-import br.com.edras.picpaysimplificado.exception.transaction.MerchantCannotTransferException;
-import br.com.edras.picpaysimplificado.exception.transaction.SameUserTransactionException;
-import br.com.edras.picpaysimplificado.exception.transaction.TransactionNotAuthorizedException;
-import br.com.edras.picpaysimplificado.exception.transaction.TransactionNotFoundException;
+import br.com.edras.picpaysimplificado.exception.transaction.*;
 import br.com.edras.picpaysimplificado.exception.user.UserNotFoundException;
 import br.com.edras.picpaysimplificado.idempotency.IdempotencyKey;
 import br.com.edras.picpaysimplificado.idempotency.IdempotencyService;
@@ -108,12 +105,12 @@ public class TransactionService {
             try {
                 return objectMapper.readValue(idempotencyKey.getResponse(), TransactionResponseDTO.class);
             } catch (Exception e) {
-                throw new RuntimeException("Failed to deserialize idempotent response", e);
+                throw new IdempotencySerializationException("Failed to deserialize idempotent response", e);
             }
         }
 
         if (idempotencyKey.getStatus() == RequestStatus.PROCESSING && idempotencyKey.getResponse() == null) {
-            throw new IllegalStateException("Request with this Idempotency-Key is already being processed");
+            throw new IdempotencyConflictException("Request with this Idempotency-Key is already being processed");
         }
 
         if (dto.getPayerId().equals(dto.getPayeeId())) {
@@ -152,7 +149,7 @@ public class TransactionService {
             idempotencyKey.setStatus(RequestStatus.COMPLETED);
             idempotencyService.save(idempotencyKey);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to serialize idempotent response", e);
+            throw new IdempotencySerializationException("Failed to serialize idempotent response", e);
         }
 
         return new TransactionResponseDTO(completedTransaction);
