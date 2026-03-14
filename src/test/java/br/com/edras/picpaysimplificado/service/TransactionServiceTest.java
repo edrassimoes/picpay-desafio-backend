@@ -3,6 +3,7 @@ package br.com.edras.picpaysimplificado.service;
 import br.com.edras.picpaysimplificado.entity.CommonUser;
 import br.com.edras.picpaysimplificado.entity.MerchantUser;
 import br.com.edras.picpaysimplificado.entity.Transaction;
+import br.com.edras.picpaysimplificado.entity.User;
 import br.com.edras.picpaysimplificado.entity.enums.TransactionStatus;
 import br.com.edras.picpaysimplificado.dto.transaction.TransactionRequestDTO;
 import br.com.edras.picpaysimplificado.dto.transaction.TransactionResponseDTO;
@@ -13,14 +14,15 @@ import br.com.edras.picpaysimplificado.exception.transaction.TransactionNotFound
 import br.com.edras.picpaysimplificado.fixtures.CommonUserFixtures;
 import br.com.edras.picpaysimplificado.fixtures.MerchantUserFixtures;
 import br.com.edras.picpaysimplificado.fixtures.TransactionFixtures;
+import br.com.edras.picpaysimplificado.fixtures.IdempotencyKeyFixtures;
 import br.com.edras.picpaysimplificado.idempotency.IdempotencyKey;
 import br.com.edras.picpaysimplificado.idempotency.IdempotencyService;
 import br.com.edras.picpaysimplificado.repository.TransactionRepository;
 import br.com.edras.picpaysimplificado.repository.UserRepository;
 import br.com.edras.picpaysimplificado.event.TransactionCompletedEvent;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -34,6 +36,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,29 +66,27 @@ public class TransactionServiceTest {
     @InjectMocks
     private TransactionService transactionService;
 
+    @BeforeEach
+    void setup() throws Exception {
+        lenient().when(idempotencyService.createKey(any()))
+                .thenReturn(IdempotencyKeyFixtures.nullStatusKey());
+
+        lenient().doReturn("{}").when(objectMapper).writeValueAsString(any());
+    }
+
     @Test
-    void transfer_WhenSuccessful_ShouldCompleteTransaction() throws JsonProcessingException {
-        CommonUser payer = CommonUserFixtures.createValidCommonUser();
-        CommonUser payee = CommonUserFixtures.createValidCommonUser();
-        payer.setId(1L);
-        payee.setId(2L);
+    void transfer_WhenSuccessful_ShouldCompleteTransaction() {
+        Transaction transaction = TransactionFixtures.createTransaction(1L, 2L);
+        User payer = transaction.getPayer();
+        User payee = transaction.getPayee();
 
         TransactionRequestDTO requestDTO = new TransactionRequestDTO(50.00, payer.getId(), payee.getId());
 
-        IdempotencyKey key = new IdempotencyKey(
-                "test-key",
-                null,
-                null,
-                null
-        );
-
-        when(idempotencyService.createKey(any())).thenReturn(key);
         when(userRepository.findById(payer.getId())).thenReturn(Optional.of(payer));
         when(userRepository.findById(payee.getId())).thenReturn(Optional.of(payee));
         when(transactionRepository.save(any(Transaction.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(authorizationService.authorize()).thenReturn(TransactionStatus.AUTHORIZED);
-        doReturn("{}").when(objectMapper).writeValueAsString(any());
 
         TransactionResponseDTO response = transactionService.transfer("test-key", requestDTO);
 
@@ -102,15 +103,6 @@ public class TransactionServiceTest {
 
         TransactionRequestDTO requestDTO = new TransactionRequestDTO(50.00, userId, userId);
 
-        IdempotencyKey key = new IdempotencyKey(
-                "test-key",
-                null,
-                null,
-                null
-        );
-
-        when(idempotencyService.createKey(any())).thenReturn(key);
-
         assertThrows(SameUserTransactionException.class, () -> transactionService.transfer("test-key", requestDTO));
 
         verify(transactionRepository, never()).save(any());
@@ -121,21 +113,11 @@ public class TransactionServiceTest {
 
     @Test
     void transfer_WhenPayerIsMerchant_ShouldThrowException() {
-        MerchantUser payer = MerchantUserFixtures.createValidMerchantUser();
-        CommonUser payee = CommonUserFixtures.createValidCommonUser();
-        payer.setId(1L);
-        payee.setId(2L);
+        MerchantUser payer = MerchantUserFixtures.createValidMerchantUser(1L);
+        CommonUser payee = CommonUserFixtures.createValidCommonUser(2L);
 
         TransactionRequestDTO requestDTO = new TransactionRequestDTO(50.00, payer.getId(), payee.getId());
 
-        IdempotencyKey key = new IdempotencyKey(
-                "test-key",
-                null,
-                null,
-                null
-        );
-
-        when(idempotencyService.createKey(any())).thenReturn(key);
         when(userRepository.findById(payer.getId())).thenReturn(Optional.of(payer));
 
         assertThrows(MerchantCannotTransferException.class, () -> transactionService.transfer("test-key", requestDTO));
@@ -148,21 +130,12 @@ public class TransactionServiceTest {
 
     @Test
     void transfer_WhenTransactionNotAuthorized_ShouldThrowException() {
-        CommonUser payer = CommonUserFixtures.createValidCommonUser();
-        CommonUser payee = CommonUserFixtures.createValidCommonUser();
-        payer.setId(1L);
-        payee.setId(2L);
+        Transaction transaction = TransactionFixtures.createTransaction(1L, 2L);
+        User payer = transaction.getPayer();
+        User payee = transaction.getPayee();
 
         TransactionRequestDTO requestDTO = new TransactionRequestDTO(50.00, payer.getId(), payee.getId());
 
-        IdempotencyKey key = new IdempotencyKey(
-                "test-key",
-                null,
-                null,
-                null
-        );
-
-        when(idempotencyService.createKey(any())).thenReturn(key);
         when(userRepository.findById(payer.getId())).thenReturn(Optional.of(payer));
         when(userRepository.findById(payee.getId())).thenReturn(Optional.of(payee));
         when(transactionRepository.save(any(Transaction.class)))
@@ -226,6 +199,62 @@ public class TransactionServiceTest {
 
         assertThat(response).isNotNull();
         assertThat(response).isEmpty();
+    }
+
+    @Test
+    void transfer_WhenRequestAlreadyCompleted_ShouldReturnSavedResponse() throws Exception {
+        TransactionRequestDTO requestDTO = new TransactionRequestDTO(50.00, 1L, 2L);
+
+        IdempotencyKey key = IdempotencyKeyFixtures.completedKey();
+
+        TransactionResponseDTO cachedResponse = mock(TransactionResponseDTO.class);
+
+        when(idempotencyService.createKey(any())).thenReturn(key);
+        doReturn(cachedResponse).when(objectMapper).readValue(any(String.class), eq(TransactionResponseDTO.class));
+
+        TransactionResponseDTO response = transactionService.transfer("test-key", requestDTO);
+
+        assertThat(response).isNotNull();
+        verify(walletService, never()).withdraw(any(), any());
+        verify(walletService, never()).deposit(any(), any());
+        verify(transactionRepository, never()).save(any());
+    }
+
+    @Test
+    void transfer_WhenRequestIsProcessing_ShouldThrowException() {
+        TransactionRequestDTO requestDTO = new TransactionRequestDTO(50.00, 1L, 2L);
+
+        IdempotencyKey key = IdempotencyKeyFixtures.processingKey();
+
+        when(idempotencyService.createKey(any())).thenReturn(key);
+
+        assertThrows(IllegalStateException.class,
+                () -> transactionService.transfer("test-key", requestDTO));
+
+        verify(walletService, never()).withdraw(any(), any());
+        verify(walletService, never()).deposit(any(), any());
+        verify(transactionRepository, never()).save(any());
+    }
+
+    @Test
+    void transfer_WhenSuccessful_ShouldPersistIdempotentResponse() {
+        Transaction transaction = TransactionFixtures.createTransaction(1L, 2L);
+        User payer = transaction.getPayer();
+        User payee = transaction.getPayee();
+
+        TransactionRequestDTO requestDTO = new TransactionRequestDTO(50.00, payer.getId(), payee.getId());
+
+        IdempotencyKey key = IdempotencyKeyFixtures.nullStatusKey();
+
+        when(userRepository.findById(payer.getId())).thenReturn(Optional.of(payer));
+        when(userRepository.findById(payee.getId())).thenReturn(Optional.of(payee));
+        when(transactionRepository.save(any(Transaction.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(authorizationService.authorize()).thenReturn(TransactionStatus.AUTHORIZED);
+
+        transactionService.transfer("test-key", requestDTO);
+
+        verify(idempotencyService).save(any());
     }
 
 }
