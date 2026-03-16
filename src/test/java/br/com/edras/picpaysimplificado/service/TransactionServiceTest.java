@@ -7,6 +7,7 @@ import br.com.edras.picpaysimplificado.entity.User;
 import br.com.edras.picpaysimplificado.entity.enums.TransactionStatus;
 import br.com.edras.picpaysimplificado.dto.transaction.TransactionRequestDTO;
 import br.com.edras.picpaysimplificado.dto.transaction.TransactionResponseDTO;
+import br.com.edras.picpaysimplificado.exception.transaction.IdempotencyConflictException;
 import br.com.edras.picpaysimplificado.exception.transaction.MerchantCannotTransferException;
 import br.com.edras.picpaysimplificado.exception.transaction.SameUserTransactionException;
 import br.com.edras.picpaysimplificado.exception.transaction.TransactionNotAuthorizedException;
@@ -228,7 +229,7 @@ public class TransactionServiceTest {
 
         when(idempotencyService.createKey(any())).thenReturn(key);
 
-        assertThrows(IllegalStateException.class,
+        assertThrows(IdempotencyConflictException.class,
                 () -> transactionService.transfer("test-key", requestDTO));
 
         verify(walletService, never()).withdraw(any(), any());
