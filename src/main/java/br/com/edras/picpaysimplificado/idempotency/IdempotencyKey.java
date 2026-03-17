@@ -3,12 +3,11 @@ package br.com.edras.picpaysimplificado.idempotency;
 import br.com.edras.picpaysimplificado.idempotency.enums.RequestStatus;
 import jakarta.persistence.*;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "idempotency_keys")
-public class IdempotencyKey implements Serializable {
+public class IdempotencyKey {
 
     @Id
     private String key;
