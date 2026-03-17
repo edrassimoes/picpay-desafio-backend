@@ -5,12 +5,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Service
-public class IdempotencyService implements Serializable {
+public class IdempotencyService {
 
     private static final String REDIS_KEY_PREFIX = "idempotency:";
     private static final Duration TTL = Duration.ofHours(24);
