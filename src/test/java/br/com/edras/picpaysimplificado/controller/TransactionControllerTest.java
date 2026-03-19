@@ -3,6 +3,7 @@ package br.com.edras.picpaysimplificado.controller;
 import br.com.edras.picpaysimplificado.entity.enums.TransactionStatus;
 import br.com.edras.picpaysimplificado.dto.transaction.TransactionRequestDTO;
 import br.com.edras.picpaysimplificado.dto.transaction.TransactionResponseDTO;
+import br.com.edras.picpaysimplificado.exception.transaction.IdempotencyConflictException;
 import br.com.edras.picpaysimplificado.exception.transaction.MerchantCannotTransferException;
 import br.com.edras.picpaysimplificado.exception.transaction.SameUserTransactionException;
 import br.com.edras.picpaysimplificado.exception.transaction.TransactionNotAuthorizedException;
@@ -56,9 +57,10 @@ class TransactionControllerTest {
         TransactionResponseDTO response = new TransactionResponseDTO(
                 1L, 1L, "Payer", 2L, "Payee", 100.0, LocalDateTime.now(), TransactionStatus.COMPLETED);
 
-        when(transactionService.transfer(any(TransactionRequestDTO.class))).thenReturn(response);
+        when(transactionService.transfer(any(String.class), any(TransactionRequestDTO.class))).thenReturn(response);
 
         mockMvc.perform(post("/transactions")
+                        .header("Idempotency-Key", "test-key")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -78,6 +80,7 @@ class TransactionControllerTest {
     """;
 
         mockMvc.perform(post("/transactions")
+                        .header("Idempotency-Key", "test-key")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidRequest))
                 .andExpect(status().isBadRequest());
@@ -93,10 +96,11 @@ class TransactionControllerTest {
         }
     """;
 
-        when(transactionService.transfer(any(TransactionRequestDTO.class)))
+        when(transactionService.transfer(any(String.class), any(TransactionRequestDTO.class)))
                 .thenThrow(new MerchantCannotTransferException(1L));
 
         mockMvc.perform(post("/transactions")
+                        .header("Idempotency-Key", "test-key")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isForbidden());
@@ -112,10 +116,11 @@ class TransactionControllerTest {
         }
     """;
 
-        when(transactionService.transfer(any(TransactionRequestDTO.class)))
+        when(transactionService.transfer(any(String.class), any(TransactionRequestDTO.class)))
                 .thenThrow(new SameUserTransactionException());
 
         mockMvc.perform(post("/transactions")
+                        .header("Idempotency-Key", "test-key")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidRequest))
                 .andExpect(status().isBadRequest());
@@ -131,10 +136,11 @@ class TransactionControllerTest {
         }
     """;
 
-        when(transactionService.transfer(any(TransactionRequestDTO.class)))
+        when(transactionService.transfer(any(String.class), any(TransactionRequestDTO.class)))
                 .thenThrow(new UserNotFoundException(99L));
 
         mockMvc.perform(post("/transactions")
+                        .header("Idempotency-Key", "test-key")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidRequest))
                 .andExpect(status().isNotFound());
@@ -150,10 +156,11 @@ class TransactionControllerTest {
         }
     """;
 
-        when(transactionService.transfer(any(TransactionRequestDTO.class)))
+        when(transactionService.transfer(any(String.class), any(TransactionRequestDTO.class)))
                 .thenThrow(new TransactionNotAuthorizedException());
 
         mockMvc.perform(post("/transactions")
+                        .header("Idempotency-Key", "test-key")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isForbidden());
@@ -170,9 +177,48 @@ class TransactionControllerTest {
     """;
 
         mockMvc.perform(post("/transactions")
+                        .header("Idempotency-Key", "test-key")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(invalidRequest))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createTransaction_ShouldReturn409_WhenIdempotencyKeyIsProcessing() throws Exception {
+        String request = """
+        {
+            "payerId": 1,
+            "payeeId": 2,
+            "amount": 100
+        }
+    """;
+
+        when(transactionService.transfer(any(String.class), any(TransactionRequestDTO.class)))
+                .thenThrow(new IdempotencyConflictException("test-key"));
+
+        mockMvc.perform(post("/transactions")
+                        .header("Idempotency-Key", "test-key")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void createTransaction_ShouldReturn201_WhenIdempotencyKeyAlreadyCompleted() throws Exception {
+        TransactionRequestDTO request = new TransactionRequestDTO(100.0, 1L, 2L);
+        TransactionResponseDTO cachedResponse = new TransactionResponseDTO(
+                1L, 1L, "Payer", 2L, "Payee", 100.0, LocalDateTime.now(), TransactionStatus.COMPLETED);
+
+        when(transactionService.transfer(any(String.class), any(TransactionRequestDTO.class)))
+                .thenReturn(cachedResponse);
+
+        mockMvc.perform(post("/transactions")
+                        .header("Idempotency-Key", "test-key")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.transactionId").value(1L))
+                .andExpect(jsonPath("$.amount").value(100.0));
     }
 
     @Test

@@ -13,4 +13,10 @@ public class CommonUserFixtures {
         return user;
     }
 
+    public static CommonUser createValidCommonUser(Long id) {
+        CommonUser user = createValidCommonUser();
+        user.setId(id);
+        return user;
+    }
+
 }

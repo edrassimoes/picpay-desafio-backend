@@ -9,10 +9,12 @@ import java.time.LocalDateTime;
 public class TransactionFixtures {
 
     public static Transaction createTransaction() {
-        CommonUser payer = CommonUserFixtures.createValidCommonUser();
-        CommonUser payee = CommonUserFixtures.createValidCommonUser();
-        payer.setId(1L);
-        payee.setId(2L);
+        return createTransaction(1L, 2L);
+    }
+
+    public static Transaction createTransaction(Long payerId, Long payeeId) {
+        CommonUser payer = CommonUserFixtures.createValidCommonUser(payerId);
+        CommonUser payee = CommonUserFixtures.createValidCommonUser(payeeId);
 
         Transaction transaction = new Transaction();
 

@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,12 +32,16 @@ public class TransactionController {
     @Operation(summary = "Create a new transaction (transfer between users)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Transaction created successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized (missing or invalid authentication token)"),
             @ApiResponse(responseCode = "400", description = "Invalid transaction (same user or not authorized)"),
             @ApiResponse(responseCode = "403", description = "Merchant users cannot transfer money"),
             @ApiResponse(responseCode = "404", description = "Payer or payee not found")
     })
-    public  ResponseEntity<TransactionResponseDTO> createTransaction(@Valid @RequestBody TransactionRequestDTO dto) {
-        TransactionResponseDTO newTransaction = transactionService.transfer(dto);
+    public ResponseEntity<TransactionResponseDTO> createTransaction(
+            @Parameter(description = "Unique idempotency key to prevent duplicate transactions", required = true)
+            @RequestHeader("Idempotency-Key") String key,
+            @Valid @RequestBody TransactionRequestDTO dto){
+        TransactionResponseDTO newTransaction = transactionService.transfer(key, dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(newTransaction);
     }
 

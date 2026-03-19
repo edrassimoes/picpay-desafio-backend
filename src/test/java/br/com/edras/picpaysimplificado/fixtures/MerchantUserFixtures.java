@@ -13,4 +13,10 @@ public class MerchantUserFixtures {
         return user;
     }
 
+    public static MerchantUser createValidMerchantUser(Long id) {
+        MerchantUser user = createValidMerchantUser();
+        user.setId(id);
+        return user;
+    }
+
 }
