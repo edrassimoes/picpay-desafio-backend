@@ -1,7 +1,5 @@
 ![banner](/assets/Banner.png)
 
----
-
 <p align="right">
   <img src="https://img.shields.io/github/actions/workflow/status/edrassimoes/picpay-simplificado/workflow.yml" />
   <img src="https://img.shields.io/badge/coverage-85%25-brightgreen" />
