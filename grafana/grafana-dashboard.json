@@ -1,0 +1,193 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "type": "datasource",
+      "pluginId": "prometheus"
+    }
+  ],
+  "title": "PicPay Simplificado",
+  "uid": "picpay-simplificado",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Taxa de sucesso de transferências (%)",
+      "type": "gauge",
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 6 },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            { "color": "red", "value": null },
+            { "color": "yellow", "value": 80 },
+            { "color": "green", "value": 95 }
+          ]
+        },
+        "min": 0,
+        "max": 100,
+        "unit": "percent"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "100 * rate(transfers_total{status=\"success\"}[5m]) / (rate(transfers_total[5m]) > 0)",
+          "legendFormat": "Taxa de sucesso"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Transferências por status (req/s)",
+      "type": "timeseries",
+      "gridPos": { "x": 6, "y": 0, "w": 10, "h": 6 },
+      "fieldConfig": {
+        "defaults": { "unit": "reqps" },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "success" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "failed" },  "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "aborted" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "rate(transfers_total{status=\"success\"}[1m])",
+          "legendFormat": "success"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "rate(transfers_total{status=\"failed\"}[1m])",
+          "legendFormat": "failed"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "rate(transfers_total{status=\"aborted\"}[1m])",
+          "legendFormat": "aborted"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Total de transferências",
+      "type": "stat",
+      "gridPos": { "x": 16, "y": 0, "w": 4, "h": 3 },
+      "options": { "reduceOptions": { "calcs": ["sum"] } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "transfers_total",
+          "legendFormat": "total"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Erros de serviços externos",
+      "type": "stat",
+      "gridPos": { "x": 16, "y": 3, "w": 4, "h": 3 },
+      "options": {
+        "reduceOptions": { "calcs": ["sum"] },
+        "colorMode": "background",
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            { "color": "green", "value": null },
+            { "color": "orange", "value": 1 },
+            { "color": "red", "value": 10 }
+          ]
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "external_service_errors_total",
+          "legendFormat": "{{service}}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Principais motivos de negação de transferência",
+      "type": "barchart",
+      "gridPos": { "x": 0, "y": 6, "w": 10, "h": 7 },
+      "options": { "orientation": "horizontal" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "transfer_denied_insufficient_funds_total",
+          "legendFormat": "Saldo insuficiente"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "transfer_denied_invalid_payer_total",
+          "legendFormat": "Lojista tentou transferir"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "transfers_total{status=\"failed\"}",
+          "legendFormat": "Negado pelo autorizador"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Erros por serviço externo (req/s)",
+      "type": "timeseries",
+      "gridPos": { "x": 10, "y": 6, "w": 10, "h": 7 },
+      "fieldConfig": { "defaults": { "unit": "reqps" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "rate(external_service_errors_total{service=\"authorizer\"}[1m])",
+          "legendFormat": "Autorizador"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "rate(external_service_errors_total{service=\"notification\"}[1m])",
+          "legendFormat": "Notificação"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Latência das requisições HTTP (p99)",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 13, "w": 12, "h": 7 },
+      "fieldConfig": { "defaults": { "unit": "s" } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{uri=\"/transactions\", method=\"POST\"}[5m])) by (le))",
+          "legendFormat": "POST /transactions p99"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "histogram_quantile(0.50, sum(rate(http_server_requests_seconds_bucket{uri=\"/transactions\", method=\"POST\"}[5m])) by (le))",
+          "legendFormat": "POST /transactions p50"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Rollbacks de transação de banco",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 13, "w": 8, "h": 7 },
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "fixedColor": "red", "mode": "fixed" } } },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "rate(spring_transaction_rollbacks_total[1m])",
+          "legendFormat": "rollbacks/s"
+        }
+      ]
+    }
+  ],
+  "templating": { "list": [] },
+  "time": { "from": "now-30m", "to": "now" },
+  "timepicker": {}
+}

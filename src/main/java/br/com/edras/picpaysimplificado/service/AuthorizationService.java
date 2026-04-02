@@ -4,15 +4,18 @@ import br.com.edras.picpaysimplificado.integration.AuthorizerClient;
 import br.com.edras.picpaysimplificado.integration.AuthorizerResponse;
 import br.com.edras.picpaysimplificado.entity.enums.TransactionStatus;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.micrometer.core.instrument.Counter;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthorizationService {
 
     private final AuthorizerClient authorizerClient;
+    private final Counter externalAuthorizerErrors;
 
-    public AuthorizationService(AuthorizerClient authorizerClient) {
+    public AuthorizationService(AuthorizerClient authorizerClient, Counter externalAuthorizerErrors) {
         this.authorizerClient = authorizerClient;
+        this.externalAuthorizerErrors = externalAuthorizerErrors;
     }
 
     @CircuitBreaker(name = "authorizerService", fallbackMethod = "authorizeFallback")
@@ -28,6 +31,7 @@ public class AuthorizationService {
     }
 
     public TransactionStatus authorizeFallback(Throwable t) {
+        externalAuthorizerErrors.increment();
         return TransactionStatus.PENDING;
     }
 
