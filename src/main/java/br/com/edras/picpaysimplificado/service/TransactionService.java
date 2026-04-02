@@ -16,6 +16,7 @@ import br.com.edras.picpaysimplificado.idempotency.IdempotencyService;
 import br.com.edras.picpaysimplificado.idempotency.enums.RequestStatus;
 import br.com.edras.picpaysimplificado.repository.TransactionRepository;
 import br.com.edras.picpaysimplificado.repository.UserRepository;
+import io.micrometer.core.instrument.Counter;
 import jakarta.transaction.Transactional;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -38,8 +39,13 @@ public class TransactionService {
     private final IdempotencyService idempotencyService;
     private final ApplicationEventPublisher eventPublisher;
     private final ObjectMapper objectMapper;
+    private final Counter transfersSuccess;
+    private final Counter transfersFailed;
+    private final Counter transfersAborted;
+    private final Counter transfersDeniedInsufficientFunds;
+    private final Counter transfersDeniedInvalidPayer;
 
-    public TransactionService(TransactionRepository transactionRepository, UserRepository userRepository, WalletService walletService, AuthorizationService authorizationService, IdempotencyService idempotencyService, ApplicationEventPublisher eventPublisher, ObjectMapper objectMapper) {
+    public TransactionService(TransactionRepository transactionRepository, UserRepository userRepository, WalletService walletService, AuthorizationService authorizationService, IdempotencyService idempotencyService, ApplicationEventPublisher eventPublisher, ObjectMapper objectMapper, Counter transfersSuccess, Counter transfersFailed, Counter transfersAborted, Counter transfersDeniedInsufficientFunds, Counter transfersDeniedInvalidPayer) {
         this.transactionRepository = transactionRepository;
         this.userRepository = userRepository;
         this.walletService = walletService;
@@ -47,6 +53,11 @@ public class TransactionService {
         this.idempotencyService = idempotencyService;
         this.eventPublisher = eventPublisher;
         this.objectMapper = objectMapper;
+        this.transfersSuccess = transfersSuccess;
+        this.transfersFailed = transfersFailed;
+        this.transfersAborted = transfersAborted;
+        this.transfersDeniedInsufficientFunds = transfersDeniedInsufficientFunds;
+        this.transfersDeniedInvalidPayer = transfersDeniedInvalidPayer;
     }
 
     private void merchantDeposit(MerchantUser merchantUser, Double amount) {
@@ -60,6 +71,7 @@ public class TransactionService {
                 .orElseThrow(() -> new UserNotFoundException(payerId));
 
         if (payer.getUserType() == UserType.MERCHANT) {
+            transfersDeniedInvalidPayer.increment();
             throw new MerchantCannotTransferException(payer.getId());
         }
 
@@ -130,6 +142,7 @@ public class TransactionService {
             transactionRepository.save(savedTransaction);
             idempotencyKey.setStatus(RequestStatus.COMPLETED);
             idempotencyService.save(idempotencyKey);
+            transfersFailed.increment();
             throw new TransactionNotAuthorizedException();
         }
 
@@ -149,9 +162,11 @@ public class TransactionService {
             idempotencyKey.setStatus(RequestStatus.COMPLETED);
             idempotencyService.save(idempotencyKey);
         } catch (Exception e) {
+            transfersAborted.increment();
             throw new IdempotencySerializationException("Failed to serialize idempotent response", e);
         }
 
+        transfersSuccess.increment();
         return new TransactionResponseDTO(completedTransaction);
     }
 
