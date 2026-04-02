@@ -13,6 +13,7 @@ import br.com.edras.picpaysimplificado.fixtures.MerchantUserFixtures;
 import br.com.edras.picpaysimplificado.fixtures.WalletFixtures;
 import br.com.edras.picpaysimplificado.repository.UserRepository;
 import br.com.edras.picpaysimplificado.repository.WalletRepository;
+import io.micrometer.core.instrument.Counter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,6 +36,9 @@ public class WalletServiceTest {
 
     @Mock
     private WalletRepository walletRepository;
+
+    @Mock
+    private Counter transfersDeniedInsufficientFunds;
 
     @InjectMocks
     private WalletService walletService;

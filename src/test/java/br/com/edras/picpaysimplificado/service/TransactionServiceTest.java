@@ -22,6 +22,7 @@ import br.com.edras.picpaysimplificado.repository.TransactionRepository;
 import br.com.edras.picpaysimplificado.repository.UserRepository;
 import br.com.edras.picpaysimplificado.event.TransactionCompletedEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.Counter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -63,6 +64,21 @@ public class TransactionServiceTest {
 
     @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    private Counter transfersSuccess;
+
+    @Mock
+    private Counter transfersFailed;
+
+    @Mock
+    private Counter transfersAborted;
+
+    @Mock
+    private Counter transfersDeniedInsufficientFunds;
+
+    @Mock
+    private Counter transfersDeniedInvalidPayer;
 
     @InjectMocks
     private TransactionService transactionService;
