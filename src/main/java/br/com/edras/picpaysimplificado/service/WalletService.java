@@ -10,6 +10,7 @@ import br.com.edras.picpaysimplificado.exception.wallet.MerchantCannotDepositExc
 import br.com.edras.picpaysimplificado.exception.wallet.WalletNotFoundException;
 import br.com.edras.picpaysimplificado.repository.UserRepository;
 import br.com.edras.picpaysimplificado.repository.WalletRepository;
+import io.micrometer.core.instrument.Counter;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -18,10 +19,12 @@ public class WalletService {
 
     private final UserRepository userRepository;
     private final WalletRepository walletRepository;
+    private final Counter transfersDeniedInsufficientFunds;
 
-    public WalletService(WalletRepository walletRepository, UserRepository userRepository) {
+    public WalletService(WalletRepository walletRepository, UserRepository userRepository, Counter transfersDeniedInsufficientFunds) {
         this.walletRepository = walletRepository;
         this.userRepository = userRepository;
+        this.transfersDeniedInsufficientFunds = transfersDeniedInsufficientFunds;
     }
 
     public Wallet createOrUpdateWallet(Wallet wallet) {
@@ -58,6 +61,7 @@ public class WalletService {
         }
         Wallet wallet = getWalletByUserId(userId);
         if (wallet.getBalance() < amount) {
+            transfersDeniedInsufficientFunds.increment();
             throw new InsufficientBalanceException();
         }
         wallet.setBalance(wallet.getBalance() - amount);
