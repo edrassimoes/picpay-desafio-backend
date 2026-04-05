@@ -4,6 +4,7 @@ import br.com.edras.picpaysimplificado.entity.CommonUser;
 import br.com.edras.picpaysimplificado.entity.Transaction;
 import br.com.edras.picpaysimplificado.entity.enums.TransactionStatus;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class TransactionFixtures {
@@ -18,7 +19,7 @@ public class TransactionFixtures {
 
         Transaction transaction = new Transaction();
 
-        transaction.setAmount(100.0);
+        transaction.setAmount(new BigDecimal("100.00"));
         transaction.setPayer(payer);
         transaction.setPayee(payee);
         transaction.setCreatedAt(LocalDateTime.now());

@@ -21,6 +21,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.math.BigDecimal;
+
 @WebMvcTest(controllers = WalletController.class, excludeAutoConfiguration = SecurityAutoConfiguration.class)
 public class WalletControllerTest {
 
@@ -42,7 +44,7 @@ public class WalletControllerTest {
     void getWalletByUserId_ShouldReturn200_WhenUserExists() throws Exception {
         Wallet wallet = new Wallet();
         wallet.setId(1L);
-        wallet.setBalance(1000.0);
+        wallet.setBalance(new BigDecimal("1000.00"));
 
         given(walletService.getWalletByUserId(1L))
                 .willReturn(wallet);
@@ -67,9 +69,9 @@ public class WalletControllerTest {
     void deposit_ShouldReturn200_WhenValidAmount() throws Exception {
         Wallet wallet = new Wallet();
         wallet.setId(1L);
-        wallet.setBalance(1100.0);
+        wallet.setBalance(new BigDecimal("1100.00"));
 
-        given(walletService.deposit(eq(1L), eq(100.0)))
+        given(walletService.deposit(eq(1L), any(BigDecimal.class)))
                 .willReturn(wallet);
 
         mockMvc.perform(patch("/wallets/user/{userId}/deposit", 1L)

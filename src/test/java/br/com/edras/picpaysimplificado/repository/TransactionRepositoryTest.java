@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -35,9 +36,9 @@ class TransactionRepositoryTest {
         entityManager.persist(user2);
         entityManager.persist(user3);
 
-        Transaction transaction1 = new Transaction(100.0, user1, user2, LocalDateTime.now(), TransactionStatus.COMPLETED);
-        Transaction transaction2 = new Transaction(50.0, user2, user1, LocalDateTime.now(), TransactionStatus.COMPLETED);
-        Transaction transaction3 = new Transaction(25.0, user3, user2, LocalDateTime.now(), TransactionStatus.COMPLETED);
+        Transaction transaction1 = new Transaction(new BigDecimal("100.00"), user1, user2, LocalDateTime.now(), TransactionStatus.COMPLETED);
+        Transaction transaction2 = new Transaction(new BigDecimal("50.00"), user2, user1, LocalDateTime.now(), TransactionStatus.COMPLETED);
+        Transaction transaction3 = new Transaction(new BigDecimal("25.00"), user3, user2, LocalDateTime.now(), TransactionStatus.COMPLETED);
 
         entityManager.persist(transaction1);
         entityManager.persist(transaction2);
@@ -69,7 +70,7 @@ class TransactionRepositoryTest {
         entityManager.persist(payer);
         entityManager.persist(payee);
 
-        Transaction transaction = new Transaction(100.0, payer, payee, LocalDateTime.now(), TransactionStatus.COMPLETED);
+        Transaction transaction = new Transaction(new BigDecimal("100.00"), payer, payee, LocalDateTime.now(), TransactionStatus.COMPLETED);
 
         entityManager.persist(transaction);
 
@@ -86,7 +87,7 @@ class TransactionRepositoryTest {
         entityManager.persist(payer);
         entityManager.persist(payee);
 
-        Transaction transaction = new Transaction(100.0, payer, payee, LocalDateTime.now(), TransactionStatus.COMPLETED);
+        Transaction transaction = new Transaction(new BigDecimal("100.00"), payer, payee, LocalDateTime.now(), TransactionStatus.COMPLETED);
 
         entityManager.persist(transaction);
 
@@ -103,7 +104,7 @@ class TransactionRepositoryTest {
         entityManager.persist(payer);
         entityManager.persist(payee);
 
-        Transaction transaction = new Transaction(100.0, payer, payee, LocalDateTime.now(), TransactionStatus.COMPLETED);
+        Transaction transaction = new Transaction(new BigDecimal("100.00"), payer, payee, LocalDateTime.now(), TransactionStatus.COMPLETED);
 
         entityManager.persist(transaction);
 
@@ -120,7 +121,7 @@ class TransactionRepositoryTest {
         entityManager.persist(payer);
         entityManager.persist(payee);
 
-        Transaction transaction = new Transaction(100.0, payer, payee, LocalDateTime.now(), TransactionStatus.COMPLETED);
+        Transaction transaction = new Transaction(new BigDecimal("100.00"), payer, payee, LocalDateTime.now(), TransactionStatus.COMPLETED);
 
         entityManager.persist(transaction);
 

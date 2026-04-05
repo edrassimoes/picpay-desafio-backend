@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -64,7 +65,7 @@ class TransactionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.amount").value(100.0))
+                .andExpect(jsonPath("$.amount").value(new BigDecimal("100.0")))
                 .andExpect(jsonPath("$.payerId").value(1L))
                 .andExpect(jsonPath("$.payeeId").value(2L));
     }
@@ -218,7 +219,7 @@ class TransactionControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.transactionId").value(1L))
-                .andExpect(jsonPath("$.amount").value(100.0));
+                .andExpect(jsonPath("$.amount").value(new BigDecimal("100.0")));
     }
 
     @Test

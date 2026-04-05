@@ -20,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -92,23 +93,23 @@ public class WalletServiceTest {
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(commonUser));
 
-        double initialBalance = commonUserWallet.getBalance();
-        double depositAmount = 50.0;
+        BigDecimal initialBalance = commonUserWallet.getBalance();
+        BigDecimal depositAmount = new BigDecimal("50.00");
 
         Wallet updatedWallet = walletService.deposit(1L, depositAmount);
 
         assertNotNull(updatedWallet);
-        assertEquals(initialBalance + depositAmount, updatedWallet.getBalance());
+        assertEquals(initialBalance.add(depositAmount), updatedWallet.getBalance());
     }
 
     @Test
     void deposit_ThrowsInvalidAmountException_ForZeroAmount() {
-        assertThrows(InvalidAmountException.class, () -> walletService.deposit(1L, 0.0));
+        assertThrows(InvalidAmountException.class, () -> walletService.deposit(1L, BigDecimal.ZERO));
     }
 
     @Test
     void deposit_ThrowsInvalidAmountException_ForNegativeAmount() {
-        assertThrows(InvalidAmountException.class, () -> walletService.deposit(1L, -50.0));
+        assertThrows(InvalidAmountException.class, () -> walletService.deposit(1L, new BigDecimal("-50.00")));
     }
 
     @Test
@@ -118,7 +119,7 @@ public class WalletServiceTest {
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(merchantUser));
 
-        assertThrows(MerchantCannotDepositException.class, () -> walletService.deposit(1L, 100.0));
+        assertThrows(MerchantCannotDepositException.class, () -> walletService.deposit(1L, new BigDecimal("100.00")));
     }
 
     @Test
@@ -128,23 +129,23 @@ public class WalletServiceTest {
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(commonUser));
 
-        double initialBalance = commonUserWallet.getBalance();
-        double withdrawAmount = 50.0;
+        BigDecimal initialBalance = commonUserWallet.getBalance();
+        BigDecimal withdrawAmount = new BigDecimal("50.00");
 
         Wallet updatedWallet = walletService.withdraw(1L, withdrawAmount);
 
         assertNotNull(updatedWallet);
-        assertEquals(initialBalance - withdrawAmount, updatedWallet.getBalance());
+        assertEquals(initialBalance.subtract(withdrawAmount), updatedWallet.getBalance());
     }
 
     @Test
     void withdraw_ThrowsInvalidAmountException_ForZeroAmount() {
-        assertThrows(InvalidAmountException.class, () -> walletService.withdraw(1L, 0.0));
+        assertThrows(InvalidAmountException.class, () -> walletService.withdraw(1L, BigDecimal.ZERO));
     }
 
     @Test
     void withdraw_ThrowsInvalidAmountException_ForNegativeAmount() {
-        assertThrows(InvalidAmountException.class, () -> walletService.withdraw(1L, -50.0));
+        assertThrows(InvalidAmountException.class, () -> walletService.withdraw(1L, new BigDecimal("-50.00")));
     }
 
     @Test
@@ -154,9 +155,7 @@ public class WalletServiceTest {
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(commonUser));
 
-        double withdrawAmount = 200.0;
-
-        assertThrows(InsufficientBalanceException.class, () -> walletService.withdraw(1L, withdrawAmount));
+        assertThrows(InsufficientBalanceException.class, () -> walletService.withdraw(1L, new BigDecimal("200.00")));
     }
 
 }
