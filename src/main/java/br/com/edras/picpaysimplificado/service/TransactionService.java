@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -60,9 +61,9 @@ public class TransactionService {
         this.transfersDeniedInvalidPayer = transfersDeniedInvalidPayer;
     }
 
-    private void merchantDeposit(MerchantUser merchantUser, Double amount) {
+    private void merchantDeposit(MerchantUser merchantUser, BigDecimal amount) {
         Wallet wallet = walletService.getWalletByUserId(merchantUser.getId());
-        wallet.setBalance(wallet.getBalance() + amount);
+        wallet.setBalance(wallet.getBalance().add(amount));
         walletService.createOrUpdateWallet(wallet);
     }
 
@@ -83,7 +84,7 @@ public class TransactionService {
                 .orElseThrow(() -> new UserNotFoundException(payeeId));
     }
 
-    private Transaction createTransaction(User payer, User payee, Double amount) {
+    private Transaction createTransaction(User payer, User payee, BigDecimal amount) {
         Transaction transaction = new Transaction();
         transaction.setAmount(amount);
         transaction.setPayer(payer);
@@ -93,7 +94,7 @@ public class TransactionService {
         return transactionRepository.save(transaction);
     }
 
-    private void processTransfer(User payer, User payee, Double amount) {
+    private void processTransfer(User payer, User payee, BigDecimal amount) {
         walletService.withdraw(payer.getId(), amount);
 
         if (payee instanceof MerchantUser) {

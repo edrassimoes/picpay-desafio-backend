@@ -14,6 +14,8 @@ import io.micrometer.core.instrument.Counter;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
 public class WalletService {
 
@@ -42,29 +44,29 @@ public class WalletService {
     }
 
     @Transactional
-    public Wallet deposit(Long userId, Double amount) {
-        if (amount <= 0){
+    public Wallet deposit(Long userId, BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new InvalidAmountException(amount);
         }
         Wallet wallet = getWalletByUserId(userId);
         if (wallet.getUser().getUserType() == UserType.MERCHANT) {
             throw new MerchantCannotDepositException();
         }
-        wallet.setBalance(wallet.getBalance() + amount);
+        wallet.setBalance(wallet.getBalance().add(amount));
         return wallet;
     }
 
     @Transactional
-    public Wallet withdraw(Long userId, Double amount) {
-        if (amount <= 0){
+    public Wallet withdraw(Long userId, BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new InvalidAmountException(amount);
         }
         Wallet wallet = getWalletByUserId(userId);
-        if (wallet.getBalance() < amount) {
+        if (wallet.getBalance().compareTo(amount) < 0) {
             transfersDeniedInsufficientFunds.increment();
             throw new InsufficientBalanceException();
         }
-        wallet.setBalance(wallet.getBalance() - amount);
+        wallet.setBalance(wallet.getBalance().subtract(amount));
         return wallet;
     }
 
