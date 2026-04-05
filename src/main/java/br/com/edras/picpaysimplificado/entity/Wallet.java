@@ -2,6 +2,7 @@ package br.com.edras.picpaysimplificado.entity;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 @Entity
@@ -11,7 +12,7 @@ public class Wallet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Double balance = 0.0;
+    private BigDecimal balance = BigDecimal.ZERO;
 
     @OneToOne
     @JoinColumn(name = "user_id")
@@ -25,11 +26,11 @@ public class Wallet {
         this.id = id;
     }
 
-    public Double getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public void setBalance(Double balance) {
+    public void setBalance(BigDecimal balance) {
         this.balance = balance;
     }
 

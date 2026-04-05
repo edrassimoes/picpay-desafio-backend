@@ -3,6 +3,7 @@ package br.com.edras.picpaysimplificado.entity;
 import br.com.edras.picpaysimplificado.entity.enums.TransactionStatus;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -13,7 +14,7 @@ public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Double amount;
+    private BigDecimal amount;
 
     @ManyToOne
     @JoinColumn(name = "payer_id")
@@ -32,7 +33,7 @@ public class Transaction {
 
     public Transaction() {}
 
-    public Transaction(Double amount, User payer, User payee, LocalDateTime createdAt, TransactionStatus status) {
+    public Transaction(BigDecimal amount, User payer, User payee, LocalDateTime createdAt, TransactionStatus status) {
         this.amount = amount;
         this.payer = payer;
         this.payee = payee;
@@ -48,11 +49,11 @@ public class Transaction {
         this.id = id;
     }
 
-    public Double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
