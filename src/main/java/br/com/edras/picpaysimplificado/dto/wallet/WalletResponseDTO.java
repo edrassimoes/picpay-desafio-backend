@@ -2,10 +2,12 @@ package br.com.edras.picpaysimplificado.dto.wallet;
 
 import br.com.edras.picpaysimplificado.entity.Wallet;
 
+import java.math.BigDecimal;
+
 public class WalletResponseDTO {
 
     private Long id;
-    private Double balance;
+    private BigDecimal balance;
 
     public WalletResponseDTO() {}
 
@@ -22,11 +24,11 @@ public class WalletResponseDTO {
         this.id = id;
     }
 
-    public Double getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public void setBalance(Double balance) {
+    public void setBalance(BigDecimal balance) {
         this.balance = balance;
     }
 

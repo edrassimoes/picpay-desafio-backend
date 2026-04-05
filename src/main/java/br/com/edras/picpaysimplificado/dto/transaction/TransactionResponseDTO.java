@@ -3,6 +3,7 @@ package br.com.edras.picpaysimplificado.dto.transaction;
 import br.com.edras.picpaysimplificado.entity.Transaction;
 import br.com.edras.picpaysimplificado.entity.enums.TransactionStatus;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class TransactionResponseDTO {
@@ -12,7 +13,7 @@ public class TransactionResponseDTO {
     private String payerName;
     private Long payeeId;
     private String payeeName;
-    private Double amount;
+    private BigDecimal amount;
     private LocalDateTime timestamp;
     private TransactionStatus transactionStatus;
 
@@ -35,7 +36,7 @@ public class TransactionResponseDTO {
         this.payerName = payerName;
         this.payeeId = payeeId;
         this.payeeName = payeeName;
-        this.amount = amount;
+        this.amount = BigDecimal.valueOf(amount);
         this.timestamp = timestamp;
         this.transactionStatus = transactionStatus;
     }
@@ -80,11 +81,11 @@ public class TransactionResponseDTO {
         this.payeeName = payeeName;
     }
 
-    public Double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 

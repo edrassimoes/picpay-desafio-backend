@@ -3,11 +3,13 @@ package br.com.edras.picpaysimplificado.dto.transaction;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
+import java.math.BigDecimal;
+
 public class TransactionRequestDTO {
 
     @NotNull
     @Positive
-    private Double amount;
+    private BigDecimal amount;
 
     @NotNull
     private Long payerId;
@@ -18,16 +20,16 @@ public class TransactionRequestDTO {
     public TransactionRequestDTO() {}
 
     public TransactionRequestDTO(Double amount, Long payerId, Long payeeId) {
-        this.amount = amount;
+        this.amount = BigDecimal.valueOf(amount);
         this.payerId = payerId;
         this.payeeId = payeeId;
     }
 
-    public Double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
