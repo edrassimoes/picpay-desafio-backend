@@ -54,9 +54,9 @@ class TransactionControllerTest {
 
     @Test
     void createTransaction_ShouldReturn201_WhenRequestIsValid() throws Exception {
-        TransactionRequestDTO request = new TransactionRequestDTO(100.0, 1L, 2L);
+        TransactionRequestDTO request = new TransactionRequestDTO(new BigDecimal("100.00"), 1L, 2L);
         TransactionResponseDTO response = new TransactionResponseDTO(
-                1L, 1L, "Payer", 2L, "Payee", 100.0, LocalDateTime.now(), TransactionStatus.COMPLETED);
+                1L, 1L, "Payer", 2L, "Payee", new BigDecimal("100.00"), LocalDateTime.now(), TransactionStatus.COMPLETED);
 
         when(transactionService.transfer(any(String.class), any(TransactionRequestDTO.class))).thenReturn(response);
 
@@ -65,7 +65,7 @@ class TransactionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.amount").value(new BigDecimal("100.0")))
+                .andExpect(jsonPath("$.amount").value(100.0))
                 .andExpect(jsonPath("$.payerId").value(1L))
                 .andExpect(jsonPath("$.payeeId").value(2L));
     }
@@ -77,6 +77,23 @@ class TransactionControllerTest {
             "payerId": 1,
             "payeeId": 2,
             "amount": 0
+        }
+    """;
+
+        mockMvc.perform(post("/transactions")
+                        .header("Idempotency-Key", "test-key")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidRequest))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createTransaction_ShouldReturn400_WhenAmountIsBelowMinimum() throws Exception {
+        String invalidRequest = """
+        {
+            "payerId": 1,
+            "payeeId": 2,
+            "amount": 0.001
         }
     """;
 
@@ -206,9 +223,9 @@ class TransactionControllerTest {
 
     @Test
     void createTransaction_ShouldReturn201_WhenIdempotencyKeyAlreadyCompleted() throws Exception {
-        TransactionRequestDTO request = new TransactionRequestDTO(100.0, 1L, 2L);
+        TransactionRequestDTO request = new TransactionRequestDTO(new BigDecimal("100.00"), 1L, 2L);
         TransactionResponseDTO cachedResponse = new TransactionResponseDTO(
-                1L, 1L, "Payer", 2L, "Payee", 100.0, LocalDateTime.now(), TransactionStatus.COMPLETED);
+                1L, 1L, "Payer", 2L, "Payee", new BigDecimal("100.00"), LocalDateTime.now(), TransactionStatus.COMPLETED);
 
         when(transactionService.transfer(any(String.class), any(TransactionRequestDTO.class)))
                 .thenReturn(cachedResponse);
@@ -219,13 +236,13 @@ class TransactionControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.transactionId").value(1L))
-                .andExpect(jsonPath("$.amount").value(new BigDecimal("100.0")));
+                .andExpect(jsonPath("$.amount").value(100.0));
     }
 
     @Test
     void findById_ShouldReturn200_WhenTransactionExists() throws Exception {
         TransactionResponseDTO response = new TransactionResponseDTO(
-                1L, 1L, "Payer", 2L, "Payee", 100.0, LocalDateTime.now(), TransactionStatus.COMPLETED);
+                1L, 1L, "Payer", 2L, "Payee", new BigDecimal("100.00"), LocalDateTime.now(), TransactionStatus.COMPLETED);
 
         when(transactionService.findById(1L)).thenReturn(response);
 
@@ -246,9 +263,9 @@ class TransactionControllerTest {
     void findTransactionsByUserId_ShouldReturn200_WithTransactionList() throws Exception {
         List<TransactionResponseDTO> response = List.of(
                 new TransactionResponseDTO(
-                        1L, 1L, "Payer", 2L, "Payee", 100.0, LocalDateTime.now(), TransactionStatus.COMPLETED),
+                        1L, 1L, "Payer", 2L, "Payee", new BigDecimal("100.00"), LocalDateTime.now(), TransactionStatus.COMPLETED),
                 new TransactionResponseDTO(
-                        1L, 1L, "Payer", 3L, "Payee", 250.0, LocalDateTime.now(), TransactionStatus.PENDING)
+                        1L, 1L, "Payer", 3L, "Payee", new BigDecimal("250.00"), LocalDateTime.now(), TransactionStatus.PENDING)
         );
 
         when(transactionService.findTransactionsByUserId(1L)).thenReturn(response);
