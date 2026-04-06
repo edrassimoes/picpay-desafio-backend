@@ -30,13 +30,13 @@ public class TransactionResponseDTO {
         this.transactionStatus = transaction.getStatus();
     }
 
-    public TransactionResponseDTO(Long transactionId, Long payerId, String payerName, Long payeeId, String payeeName, Double amount, LocalDateTime timestamp, TransactionStatus transactionStatus) {
+    public TransactionResponseDTO(Long transactionId, Long payerId, String payerName, Long payeeId, String payeeName, BigDecimal amount, LocalDateTime timestamp, TransactionStatus transactionStatus) {
         this.transactionId = transactionId;
         this.payerId = payerId;
         this.payerName = payerName;
         this.payeeId = payeeId;
         this.payeeName = payeeName;
-        this.amount = BigDecimal.valueOf(amount);
+        this.amount = amount;
         this.timestamp = timestamp;
         this.transactionStatus = transactionStatus;
     }

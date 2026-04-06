@@ -1,5 +1,6 @@
 package br.com.edras.picpaysimplificado.dto.transaction;
 
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
@@ -9,6 +10,7 @@ public class TransactionRequestDTO {
 
     @NotNull
     @Positive
+    @DecimalMin(value = "0.01", message = "O valor mínimo de transferência é R$ 0,01")
     private BigDecimal amount;
 
     @NotNull
@@ -19,8 +21,8 @@ public class TransactionRequestDTO {
 
     public TransactionRequestDTO() {}
 
-    public TransactionRequestDTO(Double amount, Long payerId, Long payeeId) {
-        this.amount = BigDecimal.valueOf(amount);
+    public TransactionRequestDTO(BigDecimal amount, Long payerId, Long payeeId) {
+        this.amount = amount;
         this.payerId = payerId;
         this.payeeId = payeeId;
     }

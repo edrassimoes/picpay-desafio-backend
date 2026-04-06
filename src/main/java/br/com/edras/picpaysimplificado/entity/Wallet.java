@@ -12,6 +12,7 @@ public class Wallet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(precision = 19, scale = 4)
     private BigDecimal balance = BigDecimal.ZERO;
 
     @OneToOne
