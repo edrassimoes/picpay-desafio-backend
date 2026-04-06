@@ -1,9 +1,7 @@
 package br.com.edras.picpaysimplificado.service;
 
-import br.com.edras.picpaysimplificado.entity.MerchantUser;
 import br.com.edras.picpaysimplificado.entity.Transaction;
 import br.com.edras.picpaysimplificado.entity.User;
-import br.com.edras.picpaysimplificado.entity.Wallet;
 import br.com.edras.picpaysimplificado.entity.enums.TransactionStatus;
 import br.com.edras.picpaysimplificado.entity.enums.UserType;
 import br.com.edras.picpaysimplificado.dto.transaction.TransactionRequestDTO;
@@ -61,12 +59,6 @@ public class TransactionService {
         this.transfersDeniedInvalidPayer = transfersDeniedInvalidPayer;
     }
 
-    private void merchantDeposit(MerchantUser merchantUser, BigDecimal amount) {
-        Wallet wallet = walletService.getWalletByUserId(merchantUser.getId());
-        wallet.setBalance(wallet.getBalance().add(amount));
-        walletService.createOrUpdateWallet(wallet);
-    }
-
     private User getPayer(Long payerId) {
         User payer = userRepository.findById(payerId)
                 .orElseThrow(() -> new UserNotFoundException(payerId));
@@ -96,12 +88,7 @@ public class TransactionService {
 
     private void processTransfer(User payer, User payee, BigDecimal amount) {
         walletService.withdraw(payer.getId(), amount);
-
-        if (payee instanceof MerchantUser) {
-            merchantDeposit((MerchantUser) payee, amount);
-        } else {
-            walletService.deposit(payee.getId(), amount);
-        }
+        walletService.depositFromTransaction(payee.getId(), amount);
     }
 
     @Transactional

@@ -57,6 +57,13 @@ public class WalletService {
     }
 
     @Transactional
+    public Wallet depositFromTransaction(Long userId, BigDecimal amount) {
+        Wallet wallet = getWalletByUserId(userId);
+        wallet.setBalance(wallet.getBalance().add(amount));
+        return walletRepository.save(wallet);
+    }
+
+    @Transactional
     public Wallet withdraw(Long userId, BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new InvalidAmountException(amount);
