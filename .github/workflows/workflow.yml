@@ -1,9 +1,9 @@
-name: Continuous Integration
+name: CI
 
-on: [push]
+on: [ push ]
 
 jobs:
-  continuous-integration:
+  tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,3 +22,15 @@ jobs:
 
       - name: Run tests
         run: ./mvnw test
+
+      - name: Run tests with PiTest
+        run: ./mvnw test org.pitest:pitest-maven:mutationCoverage
+
+      - name: Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+            name: analysis-reports
+            path: |
+              target/site/jacoco/
+              target/pit-reports/
