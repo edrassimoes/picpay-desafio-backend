@@ -1,9 +1,6 @@
 ![banner](/assets/Banner.png)
 
-<p align="right">
-  <img src="https://img.shields.io/github/actions/workflow/status/edrassimoes/picpay-simplificado/workflow.yml" />
-  <img src="https://img.shields.io/badge/coverage-85%25-brightgreen" />
-</p>
+![Build](https://img.shields.io/github/actions/workflow/status/edrassimoes/picpay-simplificado/workflow.yml) ![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen) ![Java](https://img.shields.io/badge/Java-21-007396) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4-6DB33F) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791) ![Redis](https://img.shields.io/badge/Redis-Cache-DC382D) ![Tests](https://img.shields.io/badge/tests-JUnit%20%7C%20Mockito-25A162) ![Mutation](https://img.shields.io/badge/mutation-tested-6A1B9A) ![Observability](https://img.shields.io/badge/observability-Prometheus%20%7C%20Grafana-F46800) ![Docker](https://img.shields.io/badge/docker-ready-2496ED) ![License](https://img.shields.io/badge/license-MIT-E91E63)
 
 ## 📌 Sobre o projeto
 
