@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -87,7 +88,7 @@ public class UserService {
 
         Wallet wallet = new Wallet();
         wallet.setUser(savedUser);
-        wallet.setBalance(0.0);
+        wallet.setBalance(BigDecimal.ZERO);
         walletService.createOrUpdateWallet(wallet);
 
         return new UserResponseDTO(savedUser);

@@ -1,9 +1,7 @@
 package br.com.edras.picpaysimplificado.service;
 
-import br.com.edras.picpaysimplificado.entity.MerchantUser;
 import br.com.edras.picpaysimplificado.entity.Transaction;
 import br.com.edras.picpaysimplificado.entity.User;
-import br.com.edras.picpaysimplificado.entity.Wallet;
 import br.com.edras.picpaysimplificado.entity.enums.TransactionStatus;
 import br.com.edras.picpaysimplificado.entity.enums.UserType;
 import br.com.edras.picpaysimplificado.dto.transaction.TransactionRequestDTO;
@@ -26,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -60,12 +59,6 @@ public class TransactionService {
         this.transfersDeniedInvalidPayer = transfersDeniedInvalidPayer;
     }
 
-    private void merchantDeposit(MerchantUser merchantUser, Double amount) {
-        Wallet wallet = walletService.getWalletByUserId(merchantUser.getId());
-        wallet.setBalance(wallet.getBalance() + amount);
-        walletService.createOrUpdateWallet(wallet);
-    }
-
     private User getPayer(Long payerId) {
         User payer = userRepository.findById(payerId)
                 .orElseThrow(() -> new UserNotFoundException(payerId));
@@ -83,7 +76,7 @@ public class TransactionService {
                 .orElseThrow(() -> new UserNotFoundException(payeeId));
     }
 
-    private Transaction createTransaction(User payer, User payee, Double amount) {
+    private Transaction createTransaction(User payer, User payee, BigDecimal amount) {
         Transaction transaction = new Transaction();
         transaction.setAmount(amount);
         transaction.setPayer(payer);
@@ -93,14 +86,9 @@ public class TransactionService {
         return transactionRepository.save(transaction);
     }
 
-    private void processTransfer(User payer, User payee, Double amount) {
+    private void processTransfer(User payer, User payee, BigDecimal amount) {
         walletService.withdraw(payer.getId(), amount);
-
-        if (payee instanceof MerchantUser) {
-            merchantDeposit((MerchantUser) payee, amount);
-        } else {
-            walletService.deposit(payee.getId(), amount);
-        }
+        walletService.depositFromTransaction(payee.getId(), amount);
     }
 
     @Transactional

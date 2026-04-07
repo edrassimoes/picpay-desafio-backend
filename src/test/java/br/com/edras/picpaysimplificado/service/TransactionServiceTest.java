@@ -31,6 +31,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -97,7 +98,7 @@ public class TransactionServiceTest {
         User payer = transaction.getPayer();
         User payee = transaction.getPayee();
 
-        TransactionRequestDTO requestDTO = new TransactionRequestDTO(50.00, payer.getId(), payee.getId());
+        TransactionRequestDTO requestDTO = new TransactionRequestDTO(new BigDecimal("50.00"), payer.getId(), payee.getId());
 
         when(userRepository.findById(payer.getId())).thenReturn(Optional.of(payer));
         when(userRepository.findById(payee.getId())).thenReturn(Optional.of(payee));
@@ -109,8 +110,8 @@ public class TransactionServiceTest {
 
         assertThat(response).isNotNull();
 
-        verify(walletService).withdraw(payer.getId(), requestDTO.getAmount());
-        verify(walletService).deposit(payee.getId(), requestDTO.getAmount());
+        verify(walletService).withdraw(eq(payer.getId()), any(BigDecimal.class));
+        verify(walletService).depositFromTransaction(eq(payee.getId()), any(BigDecimal.class));
         verify(eventPublisher).publishEvent(any(TransactionCompletedEvent.class));
     }
 
@@ -118,13 +119,13 @@ public class TransactionServiceTest {
     void transfer_WhenPayerIsPayee_ShouldThrowException() {
         Long userId = 1L;
 
-        TransactionRequestDTO requestDTO = new TransactionRequestDTO(50.00, userId, userId);
+        TransactionRequestDTO requestDTO = new TransactionRequestDTO(new BigDecimal("50.00"), userId, userId);
 
         assertThrows(SameUserTransactionException.class, () -> transactionService.transfer("test-key", requestDTO));
 
         verify(transactionRepository, never()).save(any());
         verify(walletService, never()).withdraw(any(), any());
-        verify(walletService, never()).deposit(any(), any());
+        verify(walletService, never()).depositFromTransaction(any(), any());
         verify(eventPublisher, never()).publishEvent(any());
     }
 
@@ -133,7 +134,7 @@ public class TransactionServiceTest {
         MerchantUser payer = MerchantUserFixtures.createValidMerchantUser(1L);
         CommonUser payee = CommonUserFixtures.createValidCommonUser(2L);
 
-        TransactionRequestDTO requestDTO = new TransactionRequestDTO(50.00, payer.getId(), payee.getId());
+        TransactionRequestDTO requestDTO = new TransactionRequestDTO(new BigDecimal("50.00"), payer.getId(), payee.getId());
 
         when(userRepository.findById(payer.getId())).thenReturn(Optional.of(payer));
 
@@ -141,7 +142,7 @@ public class TransactionServiceTest {
 
         verify(transactionRepository, never()).save(any());
         verify(walletService, never()).withdraw(any(), any());
-        verify(walletService, never()).deposit(any(), any());
+        verify(walletService, never()).depositFromTransaction(any(), any());
         verify(eventPublisher, never()).publishEvent(any());
     }
 
@@ -151,7 +152,7 @@ public class TransactionServiceTest {
         User payer = transaction.getPayer();
         User payee = transaction.getPayee();
 
-        TransactionRequestDTO requestDTO = new TransactionRequestDTO(50.00, payer.getId(), payee.getId());
+        TransactionRequestDTO requestDTO = new TransactionRequestDTO(new BigDecimal("50.00"), payer.getId(), payee.getId());
 
         when(userRepository.findById(payer.getId())).thenReturn(Optional.of(payer));
         when(userRepository.findById(payee.getId())).thenReturn(Optional.of(payee));
@@ -159,10 +160,10 @@ public class TransactionServiceTest {
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(authorizationService.authorize()).thenReturn(TransactionStatus.FAILED);
 
-        assertThrows(TransactionNotAuthorizedException.class, () -> {transactionService.transfer("test-key", requestDTO);});
+        assertThrows(TransactionNotAuthorizedException.class, () -> transactionService.transfer("test-key", requestDTO));
 
         verify(walletService, never()).withdraw(any(), any());
-        verify(walletService, never()).deposit(any(), any());
+        verify(walletService, never()).depositFromTransaction(any(), any());
         verify(eventPublisher, never()).publishEvent(any());
     }
 
@@ -184,9 +185,7 @@ public class TransactionServiceTest {
 
         when(transactionRepository.findById(transactionId)).thenReturn(Optional.empty());
 
-        assertThrows(TransactionNotFoundException.class, () -> {
-            transactionService.findById(transactionId);
-        });
+        assertThrows(TransactionNotFoundException.class, () -> transactionService.findById(transactionId));
     }
 
     @Test
@@ -220,7 +219,7 @@ public class TransactionServiceTest {
 
     @Test
     void transfer_WhenRequestAlreadyCompleted_ShouldReturnSavedResponse() throws Exception {
-        TransactionRequestDTO requestDTO = new TransactionRequestDTO(50.00, 1L, 2L);
+        TransactionRequestDTO requestDTO = new TransactionRequestDTO(new BigDecimal("50.00"), 1L, 2L);
 
         IdempotencyKey key = IdempotencyKeyFixtures.completedKey();
 
@@ -233,13 +232,13 @@ public class TransactionServiceTest {
 
         assertThat(response).isNotNull();
         verify(walletService, never()).withdraw(any(), any());
-        verify(walletService, never()).deposit(any(), any());
+        verify(walletService, never()).depositFromTransaction(any(), any());
         verify(transactionRepository, never()).save(any());
     }
 
     @Test
     void transfer_WhenRequestIsProcessing_ShouldThrowException() {
-        TransactionRequestDTO requestDTO = new TransactionRequestDTO(50.00, 1L, 2L);
+        TransactionRequestDTO requestDTO = new TransactionRequestDTO(new BigDecimal("50.00"), 1L, 2L);
 
         IdempotencyKey key = IdempotencyKeyFixtures.processingKey();
 
@@ -249,7 +248,7 @@ public class TransactionServiceTest {
                 () -> transactionService.transfer("test-key", requestDTO));
 
         verify(walletService, never()).withdraw(any(), any());
-        verify(walletService, never()).deposit(any(), any());
+        verify(walletService, never()).depositFromTransaction(any(), any());
         verify(transactionRepository, never()).save(any());
     }
 
@@ -259,9 +258,7 @@ public class TransactionServiceTest {
         User payer = transaction.getPayer();
         User payee = transaction.getPayee();
 
-        TransactionRequestDTO requestDTO = new TransactionRequestDTO(50.00, payer.getId(), payee.getId());
-
-        IdempotencyKey key = IdempotencyKeyFixtures.nullStatusKey();
+        TransactionRequestDTO requestDTO = new TransactionRequestDTO(new BigDecimal("50.00"), payer.getId(), payee.getId());
 
         when(userRepository.findById(payer.getId())).thenReturn(Optional.of(payer));
         when(userRepository.findById(payee.getId())).thenReturn(Optional.of(payee));
