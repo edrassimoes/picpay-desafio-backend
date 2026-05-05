@@ -17,23 +17,35 @@ Implementação do [desafio técnico do PicPay](https://github.com/PicPay/picpay
 ## Arquitetura
 O sistema utiliza uma arquitetura em camadas com responsabilidades bem definidas.
 
-![Arquitetura](assets/architecture-simple.svg)
-![Entidades UML](assets/uml-entities.svg)
+<div align="center">
+  <img src="assets/architecture-simple.svg" width="45%" />
+</div>
+
+<div align="center">
+  <img src="assets/uml-entities.svg" width="45%" />
+</div>
+
 
 ## Fluxo de Transferência
 O processo inclui validação de perfil (lojistas apenas recebem), verificação de saldo e garantia de execução única via chave de idempotência.
 
-![Fluxo de Transação](assets/transaction-flow-final.svg)
+<div align="center">
+  <img src="assets/transaction-flow-final.svg" width="45%" />
+</div>
 
 ## Endpoints Principais
 A documentação interativa completa (Swagger) fica disponível em `/swagger-ui/index.html`.
 
-![Open API](assets/open-api.png)
+<div align="center">
+  <img src="assets/open-api.png" width="45%" />
+</div>
 
 ## Observabilidade
 Monitoramento em tempo real via Grafana e métricas exportadas pelo Actuator.
 
-![Dashboard Grafana](assets/grafana.png)
+<div align="center">
+  <img src="assets/grafana.png" width="45%" />
+</div>
 
 ## Como Executar
 Requer **Docker** e **Docker Compose**.
