@@ -1,0 +1,125 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="992" viewBox="0 0 680 992">
+<defs>
+  <clipPath id="cu"><rect x="200" y="40" width="280" height="154" rx="8"/></clipPath>
+  <clipPath id="cc"><rect x="40" y="260" width="240" height="66" rx="8"/></clipPath>
+  <clipPath id="cm"><rect x="400" y="260" width="240" height="66" rx="8"/></clipPath>
+  <clipPath id="cw"><rect x="200" y="400" width="280" height="110" rx="8"/></clipPath>
+  <clipPath id="ct"><rect x="200" y="580" width="280" height="176" rx="8"/></clipPath>
+  <clipPath id="ci"><rect x="200" y="832" width="280" height="132" rx="8"/></clipPath>
+</defs>
+
+
+<path d="M480,117 L650,117 L650,455 L480,455" fill="none" stroke="#B4B2A9" stroke-width="0.8"/>
+<text x="484" y="111" font-size="11" fill="#888780" font-family="sans-serif">1</text>
+<text x="484" y="450" font-size="11" fill="#888780" font-family="sans-serif">1</text>
+<text x="644" y="363" font-size="11" fill="#888780" font-family="sans-serif" text-anchor="end" font-style="italic">possui</text>
+
+<path d="M200,117 L28,117 L28,668 L200,668" fill="none" stroke="#B4B2A9" stroke-width="0.8"/>
+<text x="196" y="111" font-size="11" fill="#888780" font-family="sans-serif" text-anchor="end">1</text>
+<text x="196" y="663" font-size="11" fill="#888780" font-family="sans-serif" text-anchor="end">N</text>
+<text x="32" y="383" font-size="11" fill="#888780" font-family="sans-serif" font-style="italic">payer</text>
+<text x="32" y="397" font-size="11" fill="#888780" font-family="sans-serif" font-style="italic">payee</text>
+
+<polygon points="326,208 354,208 340,194" fill="white" stroke="#B4B2A9" stroke-width="1" stroke-linejoin="round"/>
+<line x1="340" y1="208" x2="340" y2="228" stroke="#B4B2A9" stroke-width="1"/>
+<polyline points="340,228 160,228 160,260" fill="none" stroke="#B4B2A9" stroke-width="1"/>
+<polyline points="340,228 520,228 520,260" fill="none" stroke="#B4B2A9" stroke-width="1"/>
+<text x="242" y="223" font-size="10" fill="#B4B2A9" font-family="sans-serif" text-anchor="middle" font-style="italic">extends</text>
+<text x="438" y="223" font-size="10" fill="#B4B2A9" font-family="sans-serif" text-anchor="middle" font-style="italic">extends</text>
+
+<g clip-path="url(#cu)">
+  <rect x="200" y="40" width="280" height="154" fill="white"/>
+  <rect x="200" y="40" width="280" height="36" fill="#CECBF6"/>
+  <rect x="200" y="76" width="280" height="118" fill="#F7F6F3"/>
+  <line x1="200" y1="98" x2="480" y2="98" stroke="#D3D1C7" stroke-width="0.5"/>
+  <line x1="200" y1="120" x2="480" y2="120" stroke="#D3D1C7" stroke-width="0.5"/>
+  <line x1="200" y1="142" x2="480" y2="142" stroke="#D3D1C7" stroke-width="0.5"/>
+  <line x1="200" y1="164" x2="480" y2="164" stroke="#D3D1C7" stroke-width="0.5"/>
+</g>
+<rect x="200" y="40" width="280" height="154" rx="8" fill="none" stroke="#B4B2A9" stroke-width="0.5"/>
+<text x="340" y="55" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#3C3489" font-family="sans-serif">User</text>
+<text x="340" y="70" text-anchor="middle" dominant-baseline="central" font-size="10" fill="#534AB7" font-family="sans-serif" font-style="italic">abstract</text>
+<text x="208" y="87" dominant-baseline="central" font-size="12" fill="#3D3D3A" font-family="sans-serif">id : bigint</text>
+<text x="472" y="87" text-anchor="end" dominant-baseline="central" font-size="10" fill="#7F77DD" font-family="sans-serif">PK</text>
+<text x="208" y="109" dominant-baseline="central" font-size="12" fill="#3D3D3A" font-family="sans-serif">user_type : varchar</text>
+<text x="208" y="131" dominant-baseline="central" font-size="12" fill="#3D3D3A" font-family="sans-serif">name : varchar</text>
+<text x="208" y="153" dominant-baseline="central" font-size="12" fill="#3D3D3A" font-family="sans-serif">email : varchar</text>
+<text x="472" y="153" text-anchor="end" dominant-baseline="central" font-size="10" fill="#888780" font-family="sans-serif">UK</text>
+<text x="208" y="175" dominant-baseline="central" font-size="12" fill="#3D3D3A" font-family="sans-serif">password : varchar</text>
+
+<g clip-path="url(#cc)">
+  <rect x="40" y="260" width="240" height="66" fill="white"/>
+  <rect x="40" y="260" width="240" height="36" fill="#CECBF6"/>
+  <rect x="40" y="296" width="240" height="30" fill="#F7F6F3"/>
+</g>
+<rect x="40" y="260" width="240" height="66" rx="8" fill="none" stroke="#B4B2A9" stroke-width="0.5"/>
+<text x="160" y="278" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#3C3489" font-family="sans-serif">CommonUser</text>
+<text x="48" y="307" dominant-baseline="central" font-size="12" fill="#3D3D3A" font-family="sans-serif">cpf : varchar</text>
+<text x="272" y="307" text-anchor="end" dominant-baseline="central" font-size="10" fill="#888780" font-family="sans-serif">UK</text>
+
+<g clip-path="url(#cm)">
+  <rect x="400" y="260" width="240" height="66" fill="white"/>
+  <rect x="400" y="260" width="240" height="36" fill="#CECBF6"/>
+  <rect x="400" y="296" width="240" height="30" fill="#F7F6F3"/>
+</g>
+<rect x="400" y="260" width="240" height="66" rx="8" fill="none" stroke="#B4B2A9" stroke-width="0.5"/>
+<text x="520" y="278" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#3C3489" font-family="sans-serif">MerchantUser</text>
+<text x="408" y="307" dominant-baseline="central" font-size="12" fill="#3D3D3A" font-family="sans-serif">cnpj : varchar</text>
+<text x="632" y="307" text-anchor="end" dominant-baseline="central" font-size="10" fill="#888780" font-family="sans-serif">UK</text>
+
+<g clip-path="url(#cw)">
+  <rect x="200" y="400" width="280" height="110" fill="white"/>
+  <rect x="200" y="400" width="280" height="36" fill="#9FE1CB"/>
+  <rect x="200" y="436" width="280" height="74" fill="#F7F6F3"/>
+  <line x1="200" y1="458" x2="480" y2="458" stroke="#D3D1C7" stroke-width="0.5"/>
+  <line x1="200" y1="480" x2="480" y2="480" stroke="#D3D1C7" stroke-width="0.5"/>
+</g>
+<rect x="200" y="400" width="280" height="110" rx="8" fill="none" stroke="#B4B2A9" stroke-width="0.5"/>
+<text x="340" y="418" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#085041" font-family="sans-serif">Wallet</text>
+<text x="208" y="447" dominant-baseline="central" font-size="12" fill="#3D3D3A" font-family="sans-serif">id : bigint</text>
+<text x="472" y="447" text-anchor="end" dominant-baseline="central" font-size="10" fill="#1D9E75" font-family="sans-serif">PK</text>
+<text x="208" y="469" dominant-baseline="central" font-size="12" fill="#3D3D3A" font-family="sans-serif">balance : double</text>
+<text x="208" y="491" dominant-baseline="central" font-size="12" fill="#3D3D3A" font-family="sans-serif">user_id : bigint</text>
+<text x="472" y="491" text-anchor="end" dominant-baseline="central" font-size="10" fill="#888780" font-family="sans-serif">FK</text>
+
+<g clip-path="url(#ct)">
+  <rect x="200" y="580" width="280" height="176" fill="white"/>
+  <rect x="200" y="580" width="280" height="36" fill="#B5D4F4"/>
+  <rect x="200" y="616" width="280" height="140" fill="#F7F6F3"/>
+  <line x1="200" y1="638" x2="480" y2="638" stroke="#D3D1C7" stroke-width="0.5"/>
+  <line x1="200" y1="660" x2="480" y2="660" stroke="#D3D1C7" stroke-width="0.5"/>
+  <line x1="200" y1="682" x2="480" y2="682" stroke="#D3D1C7" stroke-width="0.5"/>
+  <line x1="200" y1="704" x2="480" y2="704" stroke="#D3D1C7" stroke-width="0.5"/>
+  <line x1="200" y1="726" x2="480" y2="726" stroke="#D3D1C7" stroke-width="0.5"/>
+</g>
+<rect x="200" y="580" width="280" height="176" rx="8" fill="none" stroke="#B4B2A9" stroke-width="0.5"/>
+<text x="340" y="598" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="500" fill="#0C447C" font-family="sans-serif">Transaction</text>
+<text x="208" y="627" dominant-baseline="central" font-size="12" fill="#3D3D3A" font-family="sans-serif">id : bigint</text>
+<text x="472" y="627" text-anchor="end" dominant-baseline="central" font-size="10" fill="#185FA5" font-family="sans-serif">PK</text>
+<text x="208" y="649" dominant-baseline="central" font-size="12" fill="#3D3D3A" font-family="sans-serif">amount : double</text>
+<text x="208" y="671" dominant-baseline="central" font-size="12" fill="#3D3D3A" font-family="sans-serif">payer_id : bigint</text>
+<text x="472" y="671" text-anchor="end" dominant-baseline="central" font-size="10" fill="#888780" font-family="sans-serif">FK</text>
+<text x="208" y="693" dominant-baseline="central" font-size="12" fill="#3D3D3A" font-family="sans-serif">payee_id : bigint</text>
+<text x="472" y="693" text-anchor="end" dominant-baseline="central" font-size="10" fill="#888780" font-family="sans-serif">FK</text>
+<text x="208" y="715" dominant-baseline="central" font-size="12" fill="#3D3D3A" font-family="sans-serif">created_at : timestamp</text>
+<text x="208" y="737" dominant-baseline="central" font-size="12" fill="#3D3D3A" font-family="sans-serif">status : varchar</text>
+
+<g clip-path="url(#ci)">
+  <rect x="200" y="832" width="280" height="132" fill="white"/>
+  <rect x="200" y="832" width="280" height="36" fill="#D3D1C7"/>
+  <rect x="200" y="868" width="280" height="96" fill="#F7F6F3"/>
+  <line x1="200" y1="890" x2="480" y2="890" stroke="#D3D1C7" stroke-width="0.5"/>
+  <line x1="200" y1="912" x2="480" y2="912" stroke="#D3D1C7" stroke-width="0.5"/>
+  <line x1="200" y1="934" x2="480" y2="934" stroke="#D3D1C7" stroke-width="0.5"/>
+</g>
+<rect x="200" y="832" width="280" height="132" rx="8" fill="none" stroke="#B4B2A9" stroke-width="0.5" stroke-dasharray="5 3"/>
+<text x="340" y="850" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="#444441" font-family="sans-serif">IdempotencyKey</text>
+<text x="208" y="879" dominant-baseline="central" font-size="12" fill="#3D3D3A" font-family="sans-serif">key : varchar</text>
+<text x="472" y="879" text-anchor="end" dominant-baseline="central" font-size="10" fill="#5F5E5A" font-family="sans-serif">PK</text>
+<text x="208" y="901" dominant-baseline="central" font-size="12" fill="#3D3D3A" font-family="sans-serif">status : varchar</text>
+<text x="208" y="923" dominant-baseline="central" font-size="12" fill="#3D3D3A" font-family="sans-serif">response : text</text>
+<text x="208" y="945" dominant-baseline="central" font-size="12" fill="#3D3D3A" font-family="sans-serif">created_at : timestamp</text>
+<text x="340" y="978" text-anchor="middle" font-size="11" fill="#B4B2A9" font-family="sans-serif" font-style="italic">entidade independente</text>
+</svg>
