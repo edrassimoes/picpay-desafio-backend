@@ -33,7 +33,7 @@ A documentação interativa completa (Swagger) fica disponível em `/swagger-ui/
 ## Observabilidade
 Monitoramento em tempo real via Grafana e métricas exportadas pelo Actuator.
 
-![Dashboard Grafana](assets/grafana.jpg)
+![Dashboard Grafana](assets/grafana.png)
 
 ## Como Executar
 Requer **Docker** e **Docker Compose**.
